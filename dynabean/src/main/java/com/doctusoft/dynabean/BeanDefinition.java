@@ -5,7 +5,6 @@ import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import static com.doctusoft.dynabean.Primitives.primitiveToWrapperType;
 import static com.doctusoft.dynabean.Primitives.wrap;
 import static java.util.Objects.*;
 
@@ -21,12 +20,12 @@ final class BeanDefinition {
     private final Class<?> beanInterfaceClass;
     
     private final LinkedHashMap<Method, MethodDefinition> propertyMethodMap;
-    
+
     private BeanDefinition(Class<?> beanInterfaceClass, LinkedHashMap<Method, MethodDefinition> propertyMethodMap) {
         this.beanInterfaceClass = beanInterfaceClass;
         this.propertyMethodMap = propertyMethodMap;
     }
-    
+
     public MethodDefinition getMethodDefinition(Method method) {
         return propertyMethodMap.get(method);
     }
@@ -34,7 +33,7 @@ final class BeanDefinition {
     public Class<?> getBeanInterfaceClass() {
         return beanInterfaceClass;
     }
-    
+
     public static final class Builder {
         
         private final Class<?> beanInterfaceClass;
@@ -79,7 +78,20 @@ final class BeanDefinition {
         }
         return propertyNames;
     }
-    
+
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj instanceof BeanDefinition) {
+            BeanDefinition other = (BeanDefinition) obj;
+            return Objects.equals(beanInterfaceClass, other.beanInterfaceClass);
+        }
+        return false;
+    }
+
+    public int hashCode() {
+        return beanInterfaceClass.hashCode();
+    }
+
     private static MethodDefinition defineIfProperty(Method method) {
         if (JvmInternals.isDefaultMethod(method)) {
             Class<?> declaringClass = method.getDeclaringClass();

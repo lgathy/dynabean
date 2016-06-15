@@ -346,4 +346,89 @@ public class TestDynaBeans {
         assertEquals(Long.valueOf(10), bean.getValue());
     }
 
+    @Test
+    public void getClassReturnsNonNull() {
+        SimpleBean bean = factory.create(SimpleBean.class);
+        assertNotNull(bean.getClass());
+    }
+
+    @Test
+    public void equalsAndHashCode() {
+        HashMap<String, Object> initialValues = new HashMap<>();
+        initialValues.put("str", "a string literal");
+        SimpleBean firstBean = factory.createWithInitialValues(SimpleBean.class, initialValues);
+        assertEquals(firstBean, firstBean);
+        assertEquals(firstBean.hashCode(), firstBean.hashCode());
+
+        SimpleBean secondBean = factory.createWithInitialValues(SimpleBean.class, initialValues);
+        assertEquals(firstBean, secondBean);
+        assertEquals(firstBean.hashCode(), secondBean.hashCode());
+
+        secondBean.setValue(-1L);
+        assertNotEquals(firstBean, secondBean);
+
+        secondBean.setValue(null);
+        assertEquals(firstBean, secondBean);
+        assertEquals(firstBean.hashCode(), secondBean.hashCode());
+    }
+
+    @Test
+    public void dynabeanNotEqualToDifferentDynabeanTypeWithSamePropertyValues() {
+        HashMap<String, Object> initialValues = new HashMap<>();
+        initialValues.put("str", "a string literal");
+        SimpleBean firstBean = factory.createWithInitialValues(SimpleBean.class, initialValues);
+        SimpleBean secondBean = factory.createWithInitialValues(SubBean.class, initialValues);
+        assertNotEquals(firstBean, secondBean);
+    }
+
+    @Test
+    public void dynabeanNotEqualToImplementationInstanceWithSamePropertyValues() {
+        HashMap<String, Object> initialValues = new HashMap<>();
+        initialValues.put("str", "a string literal");
+        SimpleBean firstBean = factory.createWithInitialValues(SimpleBean.class, initialValues);
+        SimpleBean secondBean = new SimpleVO();
+        secondBean.setStr(firstBean.getStr());
+        assertNotEquals(firstBean, secondBean);
+    }
+
+    @Test
+    public void equalsAndHashCodeForPrimitiveProperties() {
+        AutoboxingBean firstBean = factory.create(AutoboxingBean.class);
+        AutoboxingBean secondBean = factory.create(AutoboxingBean.class);
+        assertEquals(firstBean, secondBean);
+        assertEquals(firstBean.hashCode(), secondBean.hashCode());
+
+        secondBean.setFlag(false);
+        assertNotEquals(firstBean, secondBean);
+
+        firstBean.setFlag(false);
+        assertEquals(firstBean, secondBean);
+        assertEquals(firstBean.hashCode(), secondBean.hashCode());
+
+        firstBean.setIndex(1);
+        assertNotEquals(firstBean, secondBean);
+    }
+
+    public static class SimpleVO implements SimpleBean {
+
+        private String str;
+        private Long value;
+
+        public String getStr() {
+            return str;
+        }
+
+        public void setStr(String str) {
+            this.str = str;
+        }
+
+        public Long getValue() {
+            return value;
+        }
+
+        public void setValue(Long value) {
+            this.value = value;
+        }
+    }
+
 }
