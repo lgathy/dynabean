@@ -68,14 +68,33 @@ public class TestDynaBeans {
     
     @Test
     public void beanCanHaveExtraMethods() {
-        
         BeanWithExtraMethods bean = factory.create(BeanWithExtraMethods.class);
         String str1 = "some string value";
-        
-        assertExtraMethods(bean, null);
-        
+        assertNull(bean.getStr());
         bean.setStr(str1);
-        assertExtraMethods(bean, str1);
+        assertEquals(str1, bean.getStr());
+        try {
+            bean.setStr("something", 1);
+            fail();
+        } catch (UnsupportedOperationException e) {
+            assertEquals(str1, bean.getStr());
+        }
+        try {
+            bean.getStr(1);
+            fail();
+        } catch (UnsupportedOperationException e) {
+            assertEquals(str1, bean.getStr());
+        }
+        try {
+            bean.doSomething();
+            fail();
+        } catch (UnsupportedOperationException e) {
+        }
+        try {
+            bean.doSomethingWithArguments(null, 5);
+            fail();
+        } catch (UnsupportedOperationException e) {
+        }
     }
     
     public interface BeanWithExtraMethods {
@@ -88,7 +107,7 @@ public class TestDynaBeans {
         
         String getStr(int i);
         
-        Object doSomething();
+        void doSomething();
         
         Object doSomethingWithArguments(Object arg1, int arg2);
         
