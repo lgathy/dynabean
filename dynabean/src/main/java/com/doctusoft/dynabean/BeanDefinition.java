@@ -69,6 +69,16 @@ final class BeanDefinition {
             return new BeanDefinition(beanInterfaceClass, theMap);
         }
     }
+
+    TreeSet<String> copyPropertyNames() {
+        TreeSet<String> propertyNames = new TreeSet<>();
+        for (MethodDefinition methodDefinition : propertyMethodMap.values()) {
+            if (methodDefinition instanceof GetterMethod) {
+                propertyNames.add(((GetterMethod) methodDefinition).propertyName);
+            }
+        }
+        return propertyNames;
+    }
     
     private static MethodDefinition defineIfProperty(Method method) {
         if (JvmInternals.isDefaultMethod(method)) {

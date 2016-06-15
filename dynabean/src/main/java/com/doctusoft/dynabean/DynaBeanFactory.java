@@ -29,10 +29,10 @@ public interface DynaBeanFactory {
      * calling the setters, they will return either null or the default of their primitive type.
      *
      * @param beanInterfaceClass the class of the interface to create an instance of
-     * @param properties a map containing the initial values per the name of the properties
+     * @param initialValues a map containing the initial values per the name of the properties
      * @param <T> The generic type of the dynabean to instantiate
      * @return a new dynabean instance initialized with values given in the properties map
      */
-    <T> T buildWithProperties(Class<T> beanInterfaceClass, Map<String, ?> properties);
+    <T> T createWithInitialValues(Class<T> beanInterfaceClass, Map<String, ?> initialValues);
     
 }

@@ -2,6 +2,7 @@ package com.doctusoft.dynabean;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.*;
 
 import static java.util.Objects.requireNonNull;
@@ -20,9 +21,9 @@ final class DynaBeanInstance implements InvocationHandler, BeanProperties {
         this.propertiesMap = new TreeMap<>();
     }
 
-    DynaBeanInstance(BeanDefinition beanDefinition, Map<String, ?> properties) {
+    DynaBeanInstance(BeanDefinition beanDefinition, TreeMap<String, Object> propertiesMap) {
         this.beanDefinition = requireNonNull(beanDefinition);
-        this.propertiesMap = new TreeMap<>(properties);
+        this.propertiesMap = requireNonNull(propertiesMap);
     }
 
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -43,4 +44,16 @@ final class DynaBeanInstance implements InvocationHandler, BeanProperties {
     public void set(String propertyName, Object value) {
         propertiesMap.put(propertyName, value);
     }
+
+    static BeanProperties accessProperties(Object dynabean) {
+        if (!DynaBean.class.isInstance(dynabean) && Proxy.isProxyClass(dynabean.getClass())) {
+            throw new IllegalArgumentException("Not a dynabean instance: " + dynabean);
+        }
+        InvocationHandler invocationHandler = Proxy.getInvocationHandler(dynabean);
+        if (!DynaBeanInstance.class.isInstance(invocationHandler)) {
+            throw new IllegalArgumentException("Unrecognized invocationHandler: " + invocationHandler);
+        }
+        return (BeanProperties) invocationHandler;
+    }
+
 }

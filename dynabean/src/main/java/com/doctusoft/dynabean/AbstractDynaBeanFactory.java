@@ -2,6 +2,7 @@ package com.doctusoft.dynabean;
 
 import java.lang.reflect.Proxy;
 import java.util.*;
+import java.util.Map.*;
 
 /**
  * An extendable base class for the {@link DynaBeanFactory} interface. Subclasses must implement the
@@ -23,10 +24,17 @@ public abstract class AbstractDynaBeanFactory implements DynaBeanFactory {
     }
     
     @SuppressWarnings("unchecked")
-    public <T> T buildWithProperties(Class<T> beanInterfaceClass, Map<String, ?> properties) {
+    public <T> T createWithInitialValues(Class<T> beanInterfaceClass, Map<String, ?> initialValues) {
         BeanDefinition beanDefinition = getOrComputeBeanDefinition(beanInterfaceClass);
         Class<?>[] interfaces = { beanInterfaceClass, DynaBean.class };
-        DynaBeanInstance invoker = new DynaBeanInstance(beanDefinition, properties);
+        TreeMap<String, Object> propertiesMap = new TreeMap<>(initialValues);
+        TreeSet<String> propertyNames = beanDefinition.copyPropertyNames();
+        for (Iterator<Entry<String, Object>> it = propertiesMap.entrySet().iterator(); it.hasNext(); ) {
+            if (!propertyNames.contains(it.next().getKey())) {
+                it.remove();
+            }
+        }
+        DynaBeanInstance invoker = new DynaBeanInstance(beanDefinition, propertiesMap);
         Object dynaBeanInstance = Proxy.newProxyInstance(classLoader, interfaces, invoker);
         return (T) dynaBeanInstance;
     }

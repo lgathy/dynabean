@@ -7,7 +7,7 @@ import java.util.*;
 
 import static org.junit.Assert.*;
 
-public class TestDynaBeanFactory {
+public class TestDynaBeans {
     
     private DynaBeanFactory factory;
     
@@ -299,6 +299,51 @@ public class TestDynaBeanFactory {
 
         void setSpecified(boolean specified);
 
+    }
+
+    @Test
+    public void createWithInitialValues() {
+        HashMap<String, Object> initialValues = new HashMap<>();
+        initialValues.put("value", 10L);
+        SimpleBean bean = factory.createWithInitialValues(SimpleBean.class, initialValues);
+        assertNull(bean.getStr());
+        assertEquals(Long.valueOf(10), bean.getValue());
+    }
+
+    @Test
+    public void initialValuesMapIsCopied() {
+        HashMap<String, Object> initialValues = new HashMap<>();
+        initialValues.put("value", 10L);
+        SimpleBean bean = factory.createWithInitialValues(SimpleBean.class, initialValues);
+        initialValues.put("str", "a string");
+        assertNull(bean.getStr());
+        assertEquals(Long.valueOf(10), bean.getValue());
+        SimpleBean another = factory.createWithInitialValues(SimpleBean.class, initialValues);
+        assertEquals("a string", another.getStr());
+        assertEquals(Long.valueOf(10), another.getValue());
+    }
+
+    @Test
+    public void initialValuesForNonExistingPropertiesAreIgnored() {
+        HashMap<String, Object> initialValues = new HashMap<>();
+        initialValues.put("value", 10L);
+        initialValues.put("age", 18);
+        SimpleBean bean = factory.createWithInitialValues(SimpleBean.class, initialValues);
+        assertNull(bean.getStr());
+        assertEquals(Long.valueOf(10), bean.getValue());
+        BeanProperties properties = DynaBeanInstance.accessProperties(bean);
+        assertEquals(Long.valueOf(10), properties.get("value"));
+        assertNull(properties.get("age"));
+    }
+
+    @Test
+    public void nullAsInitialValue() {
+        HashMap<String, Object> initialValues = new HashMap<>();
+        initialValues.put("str", null);
+        initialValues.put("value", 10L);
+        SimpleBean bean = factory.createWithInitialValues(SimpleBean.class, initialValues);
+        assertNull(bean.getStr());
+        assertEquals(Long.valueOf(10), bean.getValue());
     }
 
 }
