@@ -67,6 +67,11 @@ final class DynaBeanInstance implements InvocationHandler, BeanProperties {
         return 961 + 31 * beanDefinition.hashCode() + propertiesMap.hashCode();
     }
 
+    public String toString() {
+        return "DynaBean(type=" + beanDefinition.getBeanInterfaceClass().getSimpleName() + ")";
+
+    }
+
     static BeanProperties accessProperties(Object dynabean) {
         if (!isProxyWithDynaBeanMarker(dynabean)) {
             throw new IllegalArgumentException("Not a dynabean instance: " + dynabean);
