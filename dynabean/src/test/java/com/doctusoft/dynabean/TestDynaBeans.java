@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.util.*;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 public class TestDynaBeans {
@@ -429,6 +430,16 @@ public class TestDynaBeans {
         public void setValue(Long value) {
             this.value = value;
         }
+    }
+
+    @Test
+    public void toStringContainsTypeButNoValue() {
+        SimpleBean bean = factory.create(SimpleBean.class);
+        String str = "01-234567-89?%";
+        bean.setStr(str);
+        String toString = bean.toString();
+        assertThat(toString, allOf(containsString(SimpleBean.class.getSimpleName()), not(containsString(str))));
+        assertEquals(toString, bean.toString());
     }
 
 }
