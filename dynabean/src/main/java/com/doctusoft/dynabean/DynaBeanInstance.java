@@ -38,7 +38,7 @@ final class DynaBeanInstance implements InvocationHandler, BeanProperties {
             }
             return method.invoke(this, args);
         }
-        return method.getDefaultValue(); // TODO #3
+        throw new UnsupportedOperationException("Unimplemented dynabean method: " + method);
     }
 
     public Object get(String propertyName) {
