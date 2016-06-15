@@ -85,8 +85,6 @@ public class TestDynaBeanFactory {
         
         void setStr(String str, int count);
         
-        void setStr(int count);
-        
         String getStr(int i);
         
         Object doSomething();
@@ -105,7 +103,6 @@ public class TestDynaBeanFactory {
         assertEquals(expected, bean.getStr());
         assertNull(bean.getStr(i));
         
-        bean.setStr(19);
         assertEquals(expected, bean.getStr());
         assertNull(bean.getStr(i));
         

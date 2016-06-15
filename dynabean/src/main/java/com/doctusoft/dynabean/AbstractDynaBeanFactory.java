@@ -63,7 +63,7 @@ public abstract class AbstractDynaBeanFactory implements DynaBeanFactory {
     /**
      * Internal implementation class of the proxy invoker of a dynabean instance.
      */
-    private static final class Invoker implements InvocationHandler, BeanProperties {
+    private static final class Invoker implements InvocationHandler, BeanProperties { // TODO move up: DynaBeanInstance
         
         private final BeanDefinition beanDefinition;
         
@@ -85,9 +85,9 @@ public abstract class AbstractDynaBeanFactory implements DynaBeanFactory {
                 return methodDefinition.invoke(proxy, this, args);
             }
             if (method.getDeclaringClass().equals(Object.class)) {
-                return method.invoke(this, args);
+                return method.invoke(this, args); // TODO #1
             }
-            return method.getDefaultValue(); // TODO?
+            return method.getDefaultValue(); // TODO #3
         }
         
         public Object get(String propertyName) {

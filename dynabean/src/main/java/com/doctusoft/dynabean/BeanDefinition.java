@@ -5,6 +5,8 @@ import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import static com.doctusoft.dynabean.Primitives.primitiveToWrapperType;
+import static com.doctusoft.dynabean.Primitives.wrap;
 import static java.util.Objects.*;
 
 /**
@@ -43,7 +45,7 @@ final class BeanDefinition {
             this.beanInterfaceClass = requireNonNull(beanInterfaceClass);
             this.methodDefinitionMap = new LinkedHashMap<>();
             for (Method method : beanInterfaceClass.getDeclaredMethods()) {
-                MethodDefinition methodDefinition = define(method);
+                MethodDefinition methodDefinition = defineIfProperty(method);
                 if (methodDefinition != null) {
                     methodDefinitionMap.put(method, methodDefinition);
                 }
@@ -68,7 +70,7 @@ final class BeanDefinition {
         }
     }
     
-    private static MethodDefinition define(Method method) {
+    private static MethodDefinition defineIfProperty(Method method) {
         if (JvmInternals.isDefaultMethod(method)) {
             Class<?> declaringClass = method.getDeclaringClass();
             Lookup privateLookup = JvmInternals.privateLookupOrNull(declaringClass);
@@ -89,11 +91,14 @@ final class BeanDefinition {
         Class<?>[] parameterTypes = method.getParameterTypes();
         StringBuilder buf = new StringBuilder(methodName);
         String prefix = buf.substring(0, 3);
-        boolean getter = prefix.equals("get") && parameterTypes.length == 0;
-        boolean setter = prefix.equals("set") && parameterTypes.length == 1;
+        boolean getPrefix = prefix.equals("get");
+        boolean isPrefix = prefix.startsWith("is") && Objects.equals(wrap(method.getReturnType()), Boolean.class);
+        boolean getter = parameterTypes.length == 0 && (isPrefix || getPrefix);
+        boolean setter = parameterTypes.length == 1 && prefix.equals("set");
         if (getter || setter) {
-            buf.setCharAt(3, Character.toLowerCase(buf.charAt(3)));
-            String propertyName = buf.substring(3);
+            int prefixLength = isPrefix ? 2 : 3;
+            buf.setCharAt(prefixLength, Character.toLowerCase(buf.charAt(prefixLength)));
+            String propertyName = buf.substring(prefixLength);
             if (getter) {
                 Class<?> returnType = method.getReturnType();
                 return new GetterMethod(returnType, propertyName);
