@@ -7,6 +7,9 @@ import java.util.*;
 
 import static java.util.Objects.*;
 
+/**
+ * Internal class for storing the immutable definition of a dynabean type (interface).
+ */
 final class BeanDefinition {
     
     static final Builder builder(Class<?> beanInterfaceClass) {

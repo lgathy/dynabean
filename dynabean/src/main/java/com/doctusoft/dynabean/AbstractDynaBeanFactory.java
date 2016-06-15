@@ -7,6 +7,10 @@ import java.util.*;
 
 import static java.util.Objects.*;
 
+/**
+ * An extendable base class for the {@link DynaBeanFactory} interface. Subclasses must implement the
+ * {@link #getOrComputeBeanDefinition(Class)} method to provide a fully functional implementation.
+ */
 public abstract class AbstractDynaBeanFactory implements DynaBeanFactory {
     
     private final ClassLoader classLoader = getClass().getClassLoader();
@@ -55,7 +59,10 @@ public abstract class AbstractDynaBeanFactory implements DynaBeanFactory {
             }
         }
     }
-    
+
+    /**
+     * Internal implementation class of the proxy invoker of a dynabean instance.
+     */
     private static final class Invoker implements InvocationHandler, BeanProperties {
         
         private final BeanDefinition beanDefinition;
