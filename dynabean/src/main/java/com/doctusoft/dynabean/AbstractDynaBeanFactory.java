@@ -1,11 +1,7 @@
 package com.doctusoft.dynabean;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.*;
-
-import static java.util.Objects.*;
 
 /**
  * An extendable base class for the {@link DynaBeanFactory} interface. Subclasses must implement the
@@ -21,7 +17,7 @@ public abstract class AbstractDynaBeanFactory implements DynaBeanFactory {
     public <T> T create(Class<T> beanInterfaceClass) {
         BeanDefinition beanDefinition = getOrComputeBeanDefinition(beanInterfaceClass);
         Class<?>[] interfaces = { beanInterfaceClass, DynaBean.class };
-        Invoker invoker = new Invoker(beanDefinition);
+        DynaBeanInstance invoker = new DynaBeanInstance(beanDefinition);
         Object dynaBeanInstance = Proxy.newProxyInstance(classLoader, interfaces, invoker);
         return (T) dynaBeanInstance;
     }
@@ -30,7 +26,7 @@ public abstract class AbstractDynaBeanFactory implements DynaBeanFactory {
     public <T> T buildWithProperties(Class<T> beanInterfaceClass, Map<String, ?> properties) {
         BeanDefinition beanDefinition = getOrComputeBeanDefinition(beanInterfaceClass);
         Class<?>[] interfaces = { beanInterfaceClass, DynaBean.class };
-        Invoker invoker = new Invoker(beanDefinition, properties);
+        DynaBeanInstance invoker = new DynaBeanInstance(beanDefinition, properties);
         Object dynaBeanInstance = Proxy.newProxyInstance(classLoader, interfaces, invoker);
         return (T) dynaBeanInstance;
     }
@@ -60,42 +56,4 @@ public abstract class AbstractDynaBeanFactory implements DynaBeanFactory {
         }
     }
 
-    /**
-     * Internal implementation class of the proxy invoker of a dynabean instance.
-     */
-    private static final class Invoker implements InvocationHandler, BeanProperties { // TODO move up: DynaBeanInstance
-        
-        private final BeanDefinition beanDefinition;
-        
-        private final TreeMap<String, Object> propertiesMap;
-        
-        private Invoker(BeanDefinition beanDefinition) {
-            this.beanDefinition = requireNonNull(beanDefinition);
-            this.propertiesMap = new TreeMap<>();
-        }
-        
-        private Invoker(BeanDefinition beanDefinition, Map<String, ?> properties) {
-            this.beanDefinition = requireNonNull(beanDefinition);
-            this.propertiesMap = new TreeMap<>(properties);
-        }
-        
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            MethodDefinition methodDefinition = beanDefinition.getMethodDefinition(method);
-            if (methodDefinition != null) {
-                return methodDefinition.invoke(proxy, this, args);
-            }
-            if (method.getDeclaringClass().equals(Object.class)) {
-                return method.invoke(this, args); // TODO #1
-            }
-            return method.getDefaultValue(); // TODO #3
-        }
-        
-        public Object get(String propertyName) {
-            return propertiesMap.get(propertyName);
-        }
-        
-        public void set(String propertyName, Object value) {
-            propertiesMap.put(propertyName, value);
-        }
-    }
 }
