@@ -34,5 +34,19 @@ public interface DynaBeanFactory {
      * @return a new dynabean instance initialized with values given in the properties map
      */
     <T> T createWithInitialValues(Class<T> beanInterfaceClass, Map<String, ?> initialValues);
+
+    /**
+     * Creates a new dynabean instance pre-initialized with the copied property values of the given instance.
+     * <ul>
+     * <li>All property values implementing the Cloneable interface should be cloned.</li>
+     * <li>Lists and Sets among the property values should be copied as well.</li>
+     * </ul>
+     *
+     * @param beanInterfaceClass the class of the interface to create an instance of
+     * @param instance           the original instance from which the property values are copied
+     * @param <T>                The generic type of the dynabean to instantiate
+     * @return the newly created dynabean instance
+     */
+    <T> T copyProperties(Class<T> beanInterfaceClass, T instance);
     
 }

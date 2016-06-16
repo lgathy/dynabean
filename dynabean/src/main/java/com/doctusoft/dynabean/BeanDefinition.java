@@ -13,70 +13,25 @@ import static java.util.Objects.*;
  */
 final class BeanDefinition {
     
-    static final Builder builder(Class<?> beanInterfaceClass) {
-        return new Builder(beanInterfaceClass);
-    }
-    
-    private final Class<?> beanInterfaceClass;
+    final ClassLoader classLoader;
+
+    final Class<?> beanInterfaceClass;
     
     private final LinkedHashMap<Method, MethodDefinition> propertyMethodMap;
 
-    private BeanDefinition(Class<?> beanInterfaceClass, LinkedHashMap<Method, MethodDefinition> propertyMethodMap) {
-        this.beanInterfaceClass = beanInterfaceClass;
-        this.propertyMethodMap = propertyMethodMap;
+    private BeanDefinition(ClassLoader classLoader, Class<?> beanInterfaceClass,
+        LinkedHashMap<Method, MethodDefinition> propertyMethodMap) {
+        this.classLoader = requireNonNull(classLoader, "classLoader");
+        this.beanInterfaceClass = requireNonNull(beanInterfaceClass, "beanInterfaceClass");
+        this.propertyMethodMap = requireNonNull(propertyMethodMap, "propertyMethodMap");
     }
 
     public MethodDefinition getMethodDefinition(Method method) {
         return propertyMethodMap.get(method);
     }
     
-    public Class<?> getBeanInterfaceClass() {
-        return beanInterfaceClass;
-    }
-
-    public static final class Builder {
-        
-        private final Class<?> beanInterfaceClass;
-        
-        private LinkedHashMap<Method, MethodDefinition> methodDefinitionMap;
-        
-        private Builder(Class<?> beanInterfaceClass) {
-            this.beanInterfaceClass = requireNonNull(beanInterfaceClass);
-            this.methodDefinitionMap = new LinkedHashMap<>();
-            for (Method method : beanInterfaceClass.getDeclaredMethods()) {
-                MethodDefinition methodDefinition = defineIfProperty(method);
-                if (methodDefinition != null) {
-                    methodDefinitionMap.put(method, methodDefinition);
-                }
-            }
-        }
-        
-        public Builder mergeSuperclassDefinition(BeanDefinition superclassDefinition) {
-            for (Map.Entry<Method, MethodDefinition> e : superclassDefinition.propertyMethodMap.entrySet()) {
-                Method method = e.getKey();
-                if (!this.methodDefinitionMap.containsKey(method)) {
-                    MethodDefinition definition = e.getValue();
-                    this.methodDefinitionMap.put(method, definition);
-                }
-            }
-            return this;
-        }
-        
-        public BeanDefinition build() {
-            LinkedHashMap<Method, MethodDefinition> theMap = methodDefinitionMap;
-            methodDefinitionMap = null;
-            return new BeanDefinition(beanInterfaceClass, theMap);
-        }
-    }
-
-    TreeSet<String> copyPropertyNames() {
-        TreeSet<String> propertyNames = new TreeSet<>();
-        for (MethodDefinition methodDefinition : propertyMethodMap.values()) {
-            if (methodDefinition instanceof GetterMethod) {
-                propertyNames.add(((GetterMethod) methodDefinition).propertyName);
-            }
-        }
-        return propertyNames;
+    public Map<Method, MethodDefinition> getMethodDefinitions() {
+        return Collections.unmodifiableMap(propertyMethodMap);
     }
 
     public boolean equals(Object obj) {
@@ -130,13 +85,51 @@ final class BeanDefinition {
         }
         return null;
     }
-    
-    private static final class GetterMethod implements MethodDefinition {
+
+    static final class Builder {
+
+        private final ClassLoader classLoader;
+
+        private final Class<?> beanInterfaceClass;
+
+        private LinkedHashMap<Method, MethodDefinition> methodDefinitionMap;
+
+        Builder(ClassLoader classLoader, Class<?> beanInterfaceClass) {
+            this.classLoader = requireNonNull(classLoader, "classLoader");
+            this.beanInterfaceClass = requireNonNull(beanInterfaceClass, "beanInterfaceClass");
+            this.methodDefinitionMap = new LinkedHashMap<>();
+            for (Method method : beanInterfaceClass.getDeclaredMethods()) {
+                MethodDefinition methodDefinition = defineIfProperty(method);
+                if (methodDefinition != null) {
+                    methodDefinitionMap.put(method, methodDefinition);
+                }
+            }
+        }
+
+        public Builder mergeSuperclassDefinition(BeanDefinition superclassDefinition) {
+            for (Map.Entry<Method, MethodDefinition> e : superclassDefinition.propertyMethodMap.entrySet()) {
+                Method method = e.getKey();
+                if (!this.methodDefinitionMap.containsKey(method)) {
+                    MethodDefinition definition = e.getValue();
+                    this.methodDefinitionMap.put(method, definition);
+                }
+            }
+            return this;
+        }
+
+        public BeanDefinition build() {
+            LinkedHashMap<Method, MethodDefinition> theMap = methodDefinitionMap;
+            methodDefinitionMap = null;
+            return new BeanDefinition(classLoader, beanInterfaceClass, theMap);
+        }
+    }
+
+    static final class GetterMethod implements MethodDefinition {
         
-        private final Class<?> type;
-        private final Class<?> wrap;
-        private final String propertyName;
-        private final Object defaultValue;
+        final Class<?> type;
+        final Class<?> wrap;
+        final String propertyName;
+        final Object defaultValue;
         
         private GetterMethod(Class<?> type, String propertyName) {
             this.type = requireNonNull(type);
@@ -158,11 +151,11 @@ final class BeanDefinition {
         }
     }
     
-    private static final class SetterMethod implements MethodDefinition {
+    static final class SetterMethod implements MethodDefinition {
         
-        private final Class<?> type;
-        private final Class<?> wrap;
-        private final String propertyName;
+        final Class<?> type;
+        final Class<?> wrap;
+        final String propertyName;
         
         private SetterMethod(Class<?> type, String propertyName) {
             this.type = requireNonNull(type);
@@ -182,9 +175,9 @@ final class BeanDefinition {
         }
     }
     
-    private static final class DefaultMethod implements MethodDefinition {
+    static final class DefaultMethod implements MethodDefinition {
         
-        private final MethodHandle methodHandle;
+        final MethodHandle methodHandle;
         
         private DefaultMethod(MethodHandle methodHandle) {
             this.methodHandle = methodHandle;
