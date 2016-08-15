@@ -10,7 +10,7 @@ import java.util.concurrent.*;
  * concurrent threads, but it is guaranteed that all threads will always use the same {@link BeanDefinition} instance
  * for creating the dynabean instances (the concurrently re-calculated definition instances are dropped).
  */
-public final class SharedDynaBeanFactory extends AbstractDynaBeanFactory {
+public class SharedDynaBeanFactory extends AbstractDynaBeanFactory {
     
     private final ConcurrentHashMap<Class<?>, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(64);
     

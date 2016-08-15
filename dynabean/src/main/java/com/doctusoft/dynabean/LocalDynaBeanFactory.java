@@ -7,7 +7,7 @@ import java.util.*;
  * thus this implementation is NOT thread-safe. If you need to share the {@link DynaBeanFactory} instance between
  * multiple threads, use {@link SharedDynaBeanFactory} instead.
  */
-public final class LocalDynaBeanFactory extends AbstractDynaBeanFactory {
+public class LocalDynaBeanFactory extends AbstractDynaBeanFactory {
     
     private final IdentityHashMap<Class<?>, BeanDefinition> beanDefinitionMap = new IdentityHashMap<>();
     

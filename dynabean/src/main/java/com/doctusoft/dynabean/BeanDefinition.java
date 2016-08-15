@@ -58,7 +58,7 @@ final class BeanDefinition {
                 return new DefaultMethod(privateLookup.unreflectSpecial(method, declaringClass));
             } catch (IllegalAccessException e) {
                 throw new AssertionError(
-                    "Private Lookup{" + privateLookup + "} failed to unrefletSpecial on method: " + method, e);
+                    "Private Lookup{" + privateLookup + "} failed to unreflectSpecial on method: " + method, e);
             }
         }
         String methodName = method.getName();
