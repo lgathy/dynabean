@@ -46,7 +46,27 @@ public abstract class AbstractDynaBeanFactory implements DynaBeanFactory {
         }
         return DynaBeanInstance.createProxy(beanDefinition, propertiesMap);
     }
-
+    
+    public <T> T createWithInitializer(Class<T> beanInterfaceClass, PropertyInitializer initializer) {
+        BeanDefinition beanDefinition = getOrComputeBeanDefinition(beanInterfaceClass);
+        if (!beanDefinition.beanInterfaceClass.equals(beanInterfaceClass)) {
+            throw new IllegalStateException(
+                "Wrong beanDefinition returned: " + beanDefinition + " for: " + beanInterfaceClass);
+        }
+        TreeMap<String, Object> propertiesMap = new TreeMap<>();
+        for (Entry<Method, MethodDefinition> e : beanDefinition.getMethodDefinitions().entrySet()) {
+            MethodDefinition methodDefinition = e.getValue();
+            if (methodDefinition instanceof GetterMethod) {
+                GetterMethod getter = (GetterMethod) methodDefinition;
+                String propertyName = getter.propertyName;
+                Method method = e.getKey();
+                Object value = initializer.get(propertyName, method);
+                propertiesMap.put(propertyName, value);
+            }
+        }
+        return DynaBeanInstance.createProxy(beanDefinition, propertiesMap);
+    }
+    
     public <T> T copyProperties(Class<T> beanInterfaceClass, T instance) {
         requireNonNull(instance);
         BeanDefinition beanDefinition = getOrComputeBeanDefinition(beanInterfaceClass);
