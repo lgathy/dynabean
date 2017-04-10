@@ -14,6 +14,10 @@ public class SharedDynaBeanFactory extends AbstractDynaBeanFactory {
     
     private final ConcurrentHashMap<Class<?>, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(64);
     
+    public SharedDynaBeanFactory() { super(); }
+    
+    public SharedDynaBeanFactory(ClassLoader classLoader) { super(classLoader); }
+    
     protected BeanDefinition getOrComputeBeanDefinition(Class<?> beanInterfaceClass) {
         BeanDefinition def = beanDefinitionMap.get(beanInterfaceClass);
         if (def != null) {

@@ -11,6 +11,10 @@ public class LocalDynaBeanFactory extends AbstractDynaBeanFactory {
     
     private final IdentityHashMap<Class<?>, BeanDefinition> beanDefinitionMap = new IdentityHashMap<>();
     
+    public LocalDynaBeanFactory() { super(); }
+    
+    public LocalDynaBeanFactory(ClassLoader classLoader) { super(classLoader); }
+    
     protected BeanDefinition getOrComputeBeanDefinition(Class<?> beanInterfaceClass) {
         BeanDefinition def = beanDefinitionMap.get(beanInterfaceClass);
         if (def != null) {

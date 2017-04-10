@@ -15,7 +15,15 @@ import static java.util.Objects.*;
  */
 public abstract class AbstractDynaBeanFactory implements DynaBeanFactory {
     
-    private final ClassLoader classLoader = getClass().getClassLoader();
+    private final ClassLoader classLoader;
+    
+    protected AbstractDynaBeanFactory() {
+        this.classLoader = getClass().getClassLoader();
+    }
+    
+    protected AbstractDynaBeanFactory(ClassLoader classLoader) {
+        this.classLoader = requireNonNull(classLoader, "classLoader");
+    }
     
     protected abstract BeanDefinition getOrComputeBeanDefinition(Class<?> beanInterfaceClass);
     
